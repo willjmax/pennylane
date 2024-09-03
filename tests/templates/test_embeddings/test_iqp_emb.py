@@ -299,8 +299,8 @@ class TestInterfaces:
         circuit = qml.QNode(circuit_template, dev)
         circuit2 = qml.QNode(circuit_decomposed, dev)
 
-        res = jax.jit(circuit(features))
-        res2 = jax.jit(circuit2(features))
+        res = jax.jit(circuit)(features)
+        res2 = jax.jit(circuit2)(features)
         assert qml.math.allclose(res, res2, atol=tol, rtol=0)
 
         grad_fn = jax.jacobian(circuit)

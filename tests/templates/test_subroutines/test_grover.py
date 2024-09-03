@@ -252,3 +252,31 @@ def test_decomposition_matrix(n_wires):
     mat1 = op.matrix()
     mat2 = qml.matrix(qml.tape.QuantumScript(op.decomposition()), wire_order=wires)
     assert np.allclose(mat1, mat2)
+
+@pytest.mark.jax
+def test_jit():
+    import jax
+
+    n_wires = 3
+    wires = list(range(n_wires))
+
+    def oracle():
+        qml.Hadamard(wires[-1])
+        qml.Toffoli(wires=wires)
+        qml.Hadamard(wires[-1])
+
+    dev = qml.device('default.qubit', wires=wires)
+
+    @jax.jit
+    @qml.qnode(dev)
+    def GroverSearch(num_iterations=1):
+        for wire in wires:
+            qml.Hadamard(wire)
+
+        for _ in range(num_iterations):
+            oracle()
+            qml.templates.GroverOperator(wires=wires)
+        return qml.probs(wires)
+
+    GroverSearch(num_iterations=1)
+    GroverSearch(num_iterations=2)

@@ -308,3 +308,24 @@ class TestInterferometer:
 
         shapes = qml.Interferometer.shape(n_wires)
         assert np.allclose(shapes, expected, atol=tol, rtol=0)
+
+    def test_jit(self):
+        import jax
+        import jax.numpy as jnp
+
+        dev = qml.device('default.gaussian', wires=4)
+
+        @jax.jit
+        @qml.qnode(dev)
+        def circuit(params):
+            qml.Interferometer(*params, wires=range(4))
+            return qml.expval(qml.Identity(0))
+
+        shapes = [[6, ], [6, ], [4, ]]
+        params = []
+        for shape in shapes:
+            params.append(np.random.random(shape))
+
+        params = jnp.array(params)
+
+        circuit(params)
