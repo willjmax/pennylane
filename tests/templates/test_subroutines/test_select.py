@@ -424,9 +424,9 @@ class TestInterfaces:
         circuit_jax = jax.jit(qml.QNode(select_rx_circuit, dev))
 
         assert qml.math.allclose(
-            qml.matrix(circuit_default)(input_default), qml.matrix(circuit_jax)(input_jax)
+            qml.matrix(circuit_default, wire_order=[0, 1])(input_default), qml.matrix(circuit_jax, wire_order=[0, 1])(input_jax)
         )
-        assert qml.math.get_interface(qml.matrix(circuit_jax)(input_jax)) == "jax"
+        assert qml.math.get_interface(qml.matrix(circuit_jax, wire_order=[0, 1])(input_jax)) == "jax"
 
         grad_fn = jax.grad(circuit_default)
         grads = grad_fn(input_jax)
