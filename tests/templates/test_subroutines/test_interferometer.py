@@ -311,7 +311,6 @@ class TestInterferometer:
 
     def test_jit(self):
         import jax
-        import jax.numpy as jnp
 
         dev = qml.device('default.gaussian', wires=4)
 
@@ -321,11 +320,11 @@ class TestInterferometer:
             qml.Interferometer(*params, wires=range(4))
             return qml.expval(qml.Identity(0))
 
+        import random
+
         shapes = [[6, ], [6, ], [4, ]]
         params = []
         for shape in shapes:
-            params.append(np.random.random(shape))
-
-        params = jnp.array(params)
+            params.append([random.random() for _ in range(shape[0])])
 
         circuit(params)

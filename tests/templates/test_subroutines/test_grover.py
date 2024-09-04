@@ -269,14 +269,16 @@ def test_jit():
 
     @jax.jit
     @qml.qnode(dev)
-    def GroverSearch(num_iterations=1):
+    def GroverSearch():
         for wire in wires:
             qml.Hadamard(wire)
 
-        for _ in range(num_iterations):
-            oracle()
-            qml.templates.GroverOperator(wires=wires)
+        oracle()
+        qml.GroverOperator(wires=wires)
+
+        oracle()
+        qml.GroverOperator(wires=wires)
+
         return qml.probs(wires)
 
-    GroverSearch(num_iterations=1)
-    GroverSearch(num_iterations=2)
+    GroverSearch()
