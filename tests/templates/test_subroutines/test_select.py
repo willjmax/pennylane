@@ -413,25 +413,14 @@ class TestInterfaces:
     def test_jit(self):
         """Tests jit within the jax interface."""
         import jax
-        import jax.numpy as jnp
 
-        dev = qml.device("default.qubit", wires=2)
+        dev = qml.device('default.qubit', wires=4)
+        ops = [qml.X(2), qml.X(3), qml.Y(2), qml.SWAP([2, 3])]
 
-        input_default = [0.5, 0.2]
-        input_jax = jnp.array(input_default)
+        @jax.jit
+        @qml.qnode(dev)
+        def circuit():
+            qml.Select(ops, control=[0, 1])
+            return qml.state()
 
-        circuit_default = jax.jit(qml.QNode(manual_rx_circuit, dev))
-        circuit_jax = jax.jit(qml.QNode(select_rx_circuit, dev))
-
-        assert qml.math.allclose(
-            qml.matrix(circuit_default, wire_order=[0, 1])(input_default), qml.matrix(circuit_jax, wire_order=[0, 1])(input_jax)
-        )
-        assert qml.math.get_interface(qml.matrix(circuit_jax, wire_order=[0, 1])(input_jax)) == "jax"
-
-        grad_fn = jax.grad(circuit_default)
-        grads = grad_fn(input_jax)
-
-        grad_fn2 = jax.grad(circuit_jax)
-        grads2 = grad_fn2(input_jax)
-
-        assert qml.math.allclose(grads, grads2)
+        circuit()

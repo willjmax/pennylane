@@ -320,11 +320,9 @@ class TestInterferometer:
             qml.Interferometer(*params, wires=range(4))
             return qml.expval(qml.Identity(0))
 
-        import random
-
         shapes = [[6, ], [6, ], [4, ]]
         params = []
         for shape in shapes:
-            params.append([random.random() for _ in range(shape[0])])
+            params.append(np.random.random(shape))
 
         circuit(params)

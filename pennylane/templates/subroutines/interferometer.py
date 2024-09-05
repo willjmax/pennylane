@@ -173,7 +173,6 @@ class Interferometer(CVOperation):
         id=None,
     ):
         wires = Wires(wires)
-
         n_wires = len(wires)
         shape_theta_phi = n_wires * (n_wires - 1) // 2
 
@@ -193,7 +192,9 @@ class Interferometer(CVOperation):
             "mesh": mesh,
             "beamsplitter": beamsplitter,
         }
+
         super().__init__(theta, phi, varphi, wires=wires, id=id)
+
 
     @staticmethod
     def compute_decomposition(

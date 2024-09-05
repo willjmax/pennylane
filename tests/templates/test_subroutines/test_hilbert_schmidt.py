@@ -271,7 +271,7 @@ class TestHilbertSchmidt:
 
         @jax.jit
         def cost_hst(parameters, v_function, v_wires, u_tape):
-            return (1 - hilbert_test(v_params=parameters, v_function=v_function, v_wires=v_wires, u_tape=u_tape)[0])
+            return 1 - hilbert_test(v_params=parameters, v_function=v_function, v_wires=v_wires, u_tape=u_tape)[0]
 
         cost_hst([0], v_function = v_function, v_wires = [1], u_tape = u_tape)
 
