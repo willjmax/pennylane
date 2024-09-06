@@ -981,7 +981,6 @@ class QNode:
         )
 
     def _impl_call(self, *args, **kwargs) -> qml.typing.Result:
-
         old_interface = self.interface
         if old_interface == "auto":
             interface = (

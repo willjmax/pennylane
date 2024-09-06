@@ -178,7 +178,7 @@ class UCCSD(Operation):
     grad_method = None
 
     def __init__(
-        self, weights, wires, s_wires=None, d_wires=None, init_state=None, n_repeats=1, id=None
+        self, weights, wires, s_wires=None, d_wires=None, init_state=None, id=None
     ):
         if (not s_wires) and (not d_wires):
             raise ValueError(
@@ -191,24 +191,7 @@ class UCCSD(Operation):
                     f"expected entries of d_wires to be of size 2; got {d_wires_} of length {len(d_wires_)}"
                 )
 
-        if n_repeats < 1:
-            raise ValueError(f"Requires n_repeats to be at least 1; got {n_repeats}.")
-
-        shape = qml.math.shape(weights)
-
-        expected_shape = (len(s_wires) + len(d_wires),)
-        if len(shape) == 1 and (n_repeats != 1 or shape != expected_shape):
-            raise ValueError(
-                f"For one-dimensional weights tensor, the shape must be {expected_shape}, and n_repeats should be 1; "
-                f"got {shape} and {n_repeats}, respectively."
-            )
-        if len(shape) != 1 and shape != (n_repeats,) + expected_shape:
-            raise ValueError(
-                f"Weights tensor must be of shape {(n_repeats,) + expected_shape}; got {shape}."
-            )
-
         init_state = qml.math.toarray(init_state)
-
         if init_state.dtype != np.dtype("int"):
             raise ValueError(f"Elements of 'init_state' must be integers; got {init_state.dtype}")
 
@@ -216,10 +199,53 @@ class UCCSD(Operation):
             "init_state": tuple(init_state),
             "s_wires": tuple(tuple(w) for w in s_wires),
             "d_wires": tuple(tuple(tuple(w) for w in dw) for dw in d_wires),
-            "n_repeats": n_repeats,
         }
 
         super().__init__(weights, wires=wires, id=id)
+
+    #def __init__(
+    #    self, weights, wires, s_wires=None, d_wires=None, init_state=None, n_repeats=1, id=None
+    #):
+    #    if (not s_wires) and (not d_wires):
+    #        raise ValueError(
+    #            f"s_wires and d_wires lists can not be both empty; got ph={s_wires}, pphh={d_wires}"
+    #        )
+
+    #    for d_wires_ in d_wires:
+    #        if len(d_wires_) != 2:
+    #            raise ValueError(
+    #                f"expected entries of d_wires to be of size 2; got {d_wires_} of length {len(d_wires_)}"
+    #            )
+
+    #    if n_repeats < 1:
+    #        raise ValueError(f"Requires n_repeats to be at least 1; got {n_repeats}.")
+
+    #    shape = qml.math.shape(weights)
+
+    #    expected_shape = (len(s_wires) + len(d_wires),)
+    #    if len(shape) == 1 and (n_repeats != 1 or shape != expected_shape):
+    #        raise ValueError(
+    #            f"For one-dimensional weights tensor, the shape must be {expected_shape}, and n_repeats should be 1; "
+    #            f"got {shape} and {n_repeats}, respectively."
+    #        )
+    #    if len(shape) != 1 and shape != (n_repeats,) + expected_shape:
+    #        raise ValueError(
+    #            f"Weights tensor must be of shape {(n_repeats,) + expected_shape}; got {shape}."
+    #        )
+
+    #    init_state = qml.math.toarray(init_state)
+
+    #    if init_state.dtype != np.dtype("int"):
+    #        raise ValueError(f"Elements of 'init_state' must be integers; got {init_state.dtype}")
+
+    #    self._hyperparameters = {
+    #        "init_state": tuple(init_state),
+    #        "s_wires": tuple(tuple(w) for w in s_wires),
+    #        "d_wires": tuple(tuple(tuple(w) for w in dw) for dw in d_wires),
+    #        "n_repeats": n_repeats,
+    #    }
+
+    #    super().__init__(weights, wires=wires, id=id)
 
     def map_wires(self, wire_map: dict):
         new_op = copy.deepcopy(self)
@@ -239,7 +265,7 @@ class UCCSD(Operation):
 
     @staticmethod
     def compute_decomposition(
-        weights, wires, s_wires, d_wires, init_state, n_repeats
+        weights, wires, s_wires, d_wires, init_state
     ):  # pylint: disable=arguments-differ
         r"""Representation of the operator as a product of other operators.
 
@@ -269,18 +295,18 @@ class UCCSD(Operation):
 
         op_list.append(BasisState(init_state, wires=wires))
 
-        if n_repeats == 1 and len(qml.math.shape(weights)) == 1:
-            weights = qml.math.expand_dims(weights, 0)
+        #if n_repeats == 1 and len(qml.math.shape(weights)) == 1:
+        #    weights = qml.math.expand_dims(weights, 0)
 
-        for layer in range(n_repeats):
+        for _weights in weights:
             for i, (w1, w2) in enumerate(d_wires):
                 op_list.append(
                     qml.FermionicDoubleExcitation(
-                        weights[layer][len(s_wires) + i], wires1=w1, wires2=w2
+                        _weights[len(s_wires) + i], wires1=w1, wires2=w2
                     )
                 )
 
             for j, s_wires_ in enumerate(s_wires):
-                op_list.append(qml.FermionicSingleExcitation(weights[layer][j], wires=s_wires_))
+                op_list.append(qml.FermionicSingleExcitation(_weights[j], wires=s_wires_))
 
         return op_list

@@ -371,6 +371,8 @@ class TestInterfaces:
             qml.PrepSelPrep(H, control=(3, 4))
             return qml.expval(qml.PauliZ(3) @ qml.PauliZ(4))
 
+        circuit(self.params)
+
         res = jax.grad(circuit)(self.params)
 
         assert qml.math.shape(res) == (4,)

@@ -253,11 +253,11 @@ class TestHilbertSchmidt:
     @pytest.mark.jax
     def test_jit(self):
         import jax
+        import numpy as np
 
         with qml.QueuingManager.stop_recording():
             u_tape = qml.tape.QuantumTape([qml.Hadamard(0)])
 
-        @jax.jit
         def v_function(params):
             qml.RZ(params[0], wires=1)
 
@@ -265,15 +265,11 @@ class TestHilbertSchmidt:
 
         @jax.jit
         @qml.qnode(dev)
-        def hilbert_test(v_params, v_function, v_wires, u_tape):
-            qml.HilbertSchmidt(v_params, v_function=v_function, v_wires=v_wires, u_tape=u_tape)
-            return qml.probs(u_tape.wires + v_wires)
+        def hilbert_test(v_params):
+            qml.HilbertSchmidt(v_params, v_function=v_function, v_wires=[1], u_tape=u_tape)
+            return qml.probs(u_tape.wires + [1])
 
-        @jax.jit
-        def cost_hst(parameters, v_function, v_wires, u_tape):
-            return 1 - hilbert_test(v_params=parameters, v_function=v_function, v_wires=v_wires, u_tape=u_tape)[0]
-
-        cost_hst([0], v_function = v_function, v_wires = [1], u_tape = u_tape)
+        hilbert_test(np.array([0]))
 
 class TestLocalHilbertSchmidt:
     """Tests for the Local Hilbert-Schmidt template."""
@@ -502,7 +498,6 @@ class TestLocalHilbertSchmidt:
         with qml.QueuingManager.stop_recording():
             u_tape = qml.tape.QuantumTape([qml.CZ(wires=(0,1))])
 
-        @jax.jit
         def v_function(params):
             qml.RZ(params[0], wires=2)
             qml.RZ(params[1], wires=3)
@@ -514,12 +509,9 @@ class TestLocalHilbertSchmidt:
 
         @jax.jit
         @qml.qnode(dev)
-        def local_hilbert_test(v_params, v_function, v_wires, u_tape):
-            qml.LocalHilbertSchmidt(v_params, v_function=v_function, v_wires=v_wires, u_tape=u_tape)
-            return qml.probs(u_tape.wires + v_wires)
+        def local_hilbert_test(v_params):
+            qml.LocalHilbertSchmidt(v_params, v_function=v_function, v_wires=[2, 3], u_tape=u_tape)
+            return qml.probs(u_tape.wires + [2, 3])
 
-        @jax.jit
-        def cost_lhst(parameters, v_function, v_wires, u_tape):
-            return (1 - local_hilbert_test(v_params=parameters, v_function=v_function, v_wires=v_wires, u_tape=u_tape)[0])
-
-        cost_lhst([3*np.pi/2, 3*np.pi/2, np.pi/2], v_function = v_function, v_wires = [2,3], u_tape = u_tape)
+        params = np.array([3*np.pi/2, 3*np.pi/2, np.pi/2])
+        local_hilbert_test(params)

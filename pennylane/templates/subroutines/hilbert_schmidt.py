@@ -147,6 +147,7 @@ class HilbertSchmidt(Operation):
 
         wires = qml.wires.Wires(u_wires + v_wires)
 
+        print(*params)
         super().__init__(*params, wires=wires, id=id)
 
     def map_wires(self, wire_map: dict):
