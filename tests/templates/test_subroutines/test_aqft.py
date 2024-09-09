@@ -107,5 +107,5 @@ class TestInterfaces:
             qml.Hadamard(1)
             qml.AQFT(order=1,wires=range(wires))
             return qml.state()
-        
+
         circuit_aqft()
