@@ -111,7 +111,7 @@ class TestDecomposition:
         ],
     )
 
-    @pytest.mark.xfail(reason="JIT comptability not yet implemented")
+    #@pytest.mark.xfail(reason="JIT comptability not yet implemented")
     def test_state_preparation_jax_jit(
         self, tol, qutrit_device_3_wires, basis_state, wires, target_state
     ):

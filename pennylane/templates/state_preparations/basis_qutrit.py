@@ -114,7 +114,8 @@ class QutritBasisStatePreparation(Operation):
 
         op_list = []
         for wire, state in zip(wires, basis_state):
-            for _ in range(0, state):
-                op_list.append(qml.TShift(wire))
+            op_list.append(qml.pow(qml.TShift(wire), z=state))
+            #for _ in range(0, state):
+            #    op_list.append(qml.TShift(wire))
 
         return op_list
